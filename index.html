@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>🔥 Smart Car Remote</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  background:linear-gradient(135deg,#0f0f0f,#1a1a2e,#16213e);
+  font-family:Segoe UI, Arial;
+  color:white;
+  text-align:center;
+}
+
+h1{
+  margin-top:20px;
+  font-size:28px;
+  letter-spacing:2px;
+  text-shadow:0 0 10px #00f7ff;
+}
+
+.connect-btn{
+  margin-top:15px;
+  padding:12px 25px;
+  font-size:16px;
+  border:none;
+  border-radius:30px;
+  background:#00f7ff;
+  color:black;
+  font-weight:bold;
+  box-shadow:0 0 20px #00f7ff;
+}
+
+.panel{
+  margin-top:40px;
+}
+
+.row{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.btn{
+  width:90px;
+  height:90px;
+  margin:12px;
+  border-radius:25px;
+  border:none;
+  font-size:28px;
+  font-weight:bold;
+  color:white;
+  background:linear-gradient(145deg,#1f4068,#16213e);
+  box-shadow:0 0 15px #00f7ff;
+  transition:0.2s;
+}
+
+.btn:active{
+  transform:scale(0.9);
+  box-shadow:0 0 25px #ff2e63;
+  background:#ff2e63;
+}
+
+.mode-btn{
+  width:120px;
+  height:55px;
+  margin:10px;
+  border-radius:30px;
+  border:none;
+  font-size:16px;
+  font-weight:bold;
+  color:black;
+  background:#00ff95;
+  box-shadow:0 0 15px #00ff95;
+}
+
+.status{
+  margin-top:20px;
+  font-size:14px;
+  color:#aaa;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🚗 SMART CAR CONTROL</h1>
+
+<button class="connect-btn" onclick="connect()">🔗 CONNECT</button>
+
+<div class="panel">
+
+  <div class="row">
+    <button class="btn" onclick="sendCommand('F')">⬆</button>
+  </div>
+
+  <div class="row">
+    <button class="btn" onclick="sendCommand('L')">⬅</button>
+    <button class="btn" onclick="sendCommand('S')">⏹</button>
+    <button class="btn" onclick="sendCommand('R')">➡</button>
+  </div>
+
+  <div class="row">
+    <button class="btn" onclick="sendCommand('B')">⬇</button>
+  </div>
+
+  <div class="row">
+    <button class="mode-btn" onclick="sendCommand('A')">AUTO</button>
+    <button class="mode-btn" onclick="sendCommand('M')">MANUAL</button>
+  </div>
+
+</div>
+
+<div class="status" id="status">Not Connected</div>
+
+<script>
+let device;
+let characteristic;
+
+async function connect(){
+  try{
+    device = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: ['00001101-0000-1000-8000-00805f9b34fb']
+    });
+
+    const server = await device.gatt.connect();
+    const service = await server.getPrimaryService('00001101-0000-1000-8000-00805f9b34fb');
+    characteristic = await service.getCharacteristic('00001101-0000-1000-8000-00805f9b34fb');
+
+    document.getElementById("status").innerText = "Connected ✅";
+  }
+  catch(error){
+    document.getElementById("status").innerText = "Connection Failed ❌";
+  }
+}
+
+function sendCommand(cmd){
+  if(!characteristic){
+    alert("Connect Bluetooth First!");
+    return;
+  }
+  let encoder = new TextEncoder();
+  characteristic.writeValue(encoder.encode(cmd));
+}
+</script>
+
+</body>
+</html>
